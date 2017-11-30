@@ -22,29 +22,32 @@ void callback(const PointCloud::ConstPtr& msg)
 
 int main(int argc, char** argv)
 {
-  ros::init (argc, argv, "sub_cloud_base");
+  ros::init (argc, argv, "my_cloud_base");
   ros::NodeHandle nh;
-  ros::Rate loop_rate(4);
+  ros::Rate loop_rate(10);
     
     
-  ros::Subscriber sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZRGB>>("/cloud_base", 1, callback);
+  ros::Subscriber sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZRGB> >("/cloud_base", 1, callback);
   while (base->points.size() == 0){
     ros::spinOnce ();
     loop_rate.sleep ();
   }
   
   
-  ros::init (argc, argv, "pub_pcl");
-  ros::Publisher pub = nh.advertise<PointCloud> ("points2", 1);
+  ros::Publisher pub = nh.advertise<PointCloud> ("/cloud_light", 1);
+  
+  
   
   std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> targets = getCluster(base);
   PointCloud::Ptr msg = targets.at(1);
+  std::cout << "get msg" << std::endl;
   
 
   while (nh.ok())
   {
-    msg->header.stamp = ros::Time::now().toNSec();
+    //msg->header.stamp = ros::Time::now().toNSec();
     pub.publish (msg);
+    std::cout << "msg published" << std::endl;
     ros::spinOnce ();
     loop_rate.sleep ();
   }

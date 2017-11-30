@@ -116,12 +116,16 @@ std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> getCluster(pcl::PointCloud<p
     //j++;
   }
   
+  std::cout << clusters.size() << " clusters" << std::endl;
+  
   for (int i = 0; i < clusters.size(); i ++)
   {
     Eigen::Vector3i rgb = centroids.at(i).getRGBVector3i ();
+    std::cout << "r: " << rgb(0) << " g: " << rgb(1) << " b:" << rgb(2) << std::endl;
     if (rgb(0) > 100 && rgb(1) > 100 && rgb(2) > 100)
     {
       targets.push_back(clusters.at(i));
+      std::cout << clusters.at(i)->size() << std::endl;
       break;
     }
   }
@@ -129,9 +133,11 @@ std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> getCluster(pcl::PointCloud<p
   for (int i = 0; i < clusters.size(); i ++)
   {
     Eigen::Vector3i rgb = centroids.at(i).getRGBVector3i ();
-    if (rgb(0) < 50 && rgb(1) < 50 && rgb(2) > 60)
+    std::cout << "r: " << rgb(0) << " g: " << rgb(1) << " b:" << rgb(2) << std::endl;
+    if (rgb(0) < 100 && rgb(1) < 100 && rgb(2) > 100)
     {
       targets.push_back(clusters.at(i));
+      std::cout << clusters.at(i)->size() << std::endl;
       break;
     }
   }
