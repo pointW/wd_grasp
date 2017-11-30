@@ -1,0 +1,2 @@
+/home/baxter/wd/pcl/cluster/CMakeFiles/cluster_extraction.dir
+/home/baxter/wd/pcl/cluster/CMakeFiles/publisher.dir

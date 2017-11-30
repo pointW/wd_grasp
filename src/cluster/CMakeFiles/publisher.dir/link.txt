@@ -1,0 +1,1 @@
+/usr/bin/c++     -Wno-deprecated     CMakeFiles/publisher.dir/publisher.cpp.o  -o publisher  -L/usr/local/lib -rdynamic 
