@@ -8,6 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp
   rospy
   std_msgs
+  geometry_msgs
 )
 
 # PCL
@@ -50,11 +51,10 @@ add_definitions(${PCL_DEFINITIONS})
 ##   * add every package in MSG_DEP_SET to generate_messages(DEPENDENCIES ...)
 
 ## Generate messages in the 'msg' folder
-# add_message_files(
-#   FILES
-#   Message1.msg
-#   Message2.msg
-# )
+add_message_files(
+  FILES
+  GoalConfig.msg
+)
 
 ## Generate services in the 'srv' folder
 # add_service_files(
@@ -71,10 +71,10 @@ add_definitions(${PCL_DEFINITIONS})
 # )
 
 ## Generate added messages and services with any dependencies listed here
-# generate_messages(
-#   DEPENDENCIES
-#   std_msgs
-# )
+generate_messages(
+  DEPENDENCIES
+  geometry_msgs
+)
 
 ################################################
 ## Declare ROS dynamic reconfigure parameters ##
@@ -150,7 +150,8 @@ add_executable(${PROJECT_NAME}_publisher src/publisher/publisher.cpp)
 # )
 target_link_libraries(${PROJECT_NAME}_publisher 
                       ${catkin_LIBRARIES}
-                      ${PCL_LIBRARIES})
+                      ${PCL_LIBRARIES}
+                      ${GENERATOR_LIB}) 
                       
 target_link_libraries(${PROJECT_NAME}_cluster
                       ${catkin_LIBRARIES}
