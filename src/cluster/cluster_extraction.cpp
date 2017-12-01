@@ -134,7 +134,7 @@ std::vector<pcl::PointCloud<pcl::PointXYZRGB>::Ptr> getCluster(pcl::PointCloud<p
   {
     Eigen::Vector3i rgb = centroids.at(i).getRGBVector3i ();
     std::cout << "r: " << rgb(0) << " g: " << rgb(1) << " b:" << rgb(2) << std::endl;
-    if (rgb(0) < 100 && rgb(1) < 100 && rgb(2) > 100)
+    if (rgb(0) < 70 && rgb(1) < 70 && rgb(2) > 70)
     {
       targets.push_back(clusters.at(i));
       std::cout << clusters.at(i)->size() << std::endl;
