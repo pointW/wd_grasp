@@ -39,8 +39,8 @@ while not rospy.is_shutdown():
 
 pub_goal = rospy.Publisher('goal_config', GoalConfig, queue_size=1)
 pub_pick = rospy.Publisher('pick_config', Quaternion, queue_size=1)
-pub_pick_mark = rospy.Publisher('pick_mark', Marker, queue_size=0)
-pub_place_mark = rospy.Publisher('place_mark', Marker, queue_size=0)
+pub_pick_mark = rospy.Publisher('pick_mark', Marker, queue_size=1)
+pub_place_mark = rospy.Publisher('place_mark', Marker, queue_size=1)
 
 grasp = grasps[0]
 for g in grasps:
@@ -80,7 +80,7 @@ place_rotation = numpy.array([[grasp.approach.x, grasp.binormal.x, grasp.axis.x,
                               [0, 0, 0, 1]])
 place_quat = tf.transformations.quaternion_from_matrix(place_rotation)
 place_pos = goal_pos
-place_pos.z = pick_pos.z + 0.02
+place_pos.z = pick_pos.z + 0.05
 place_marker = Marker()
 place_marker.header.frame_id = "base"
 place_marker.header.stamp = rospy.Time()
@@ -103,11 +103,96 @@ place_marker.color.r = 0.0
 place_marker.color.g = 1.0
 place_marker.color.b = 0.0
 
-pub_pick_mark.publish(pick_marker)
-pub_place_mark.publish(place_marker)
+for i in range(1, 10):
+    pub_pick_mark.publish(pick_marker)
+    pub_place_mark.publish(place_marker)
+    rospy.sleep(0.1)
 
 s = raw_input('Hit [ENTER] to continue')
 
+import sys
+import copy
+import rospy
+import moveit_commander
+import moveit_msgs.msg
+import geometry_msgs.msg
+import baxter_interface
+
+gripper = baxter_interface.Gripper('right')
+
+end_rotation = numpy.array([[grasp.axis.x, grasp.approach.x, grasp.binormal.x, grasp.bottom.x],
+                            [grasp.axis.y, grasp.approach.y, grasp.binormal.y, grasp.bottom.y],
+                            [grasp.axis.z, grasp.approach.z, grasp.binormal.z, grasp.bottom.z],
+                            [0, 0, 0, 1]])
+end_quat = tf.transformations.quaternion_from_matrix(end_rotation)
+orientation = Quaternion(x = end_quat[0],
+                         y = end_quat[1],
+                         z = end_quat[2],
+                         w = end_quat[3])
+
+print "============ Starting tutorial setup"
+moveit_commander.roscpp_initialize(sys.argv)
+robot = moveit_commander.RobotCommander()
+scene = moveit_commander.PlanningSceneInterface()
+group = moveit_commander.MoveGroupCommander('right_arm')
+display_trajectory_publisher = rospy.Publisher('/move_group/display_planned_path',
+                                       moveit_msgs.msg.DisplayTrajectory,
+                                       queue_size=20)
+print "============ Waiting for RVIZ..."
+rospy.sleep(10)
+print "============ Reference frame: %s" % group.get_planning_frame()
+print "============ Reference frame: %s" % group.get_end_effector_link()
+print "============ Robot Groups:"
+print robot.get_group_names()
+print "============ Printing robot state"
+print robot.get_current_state()
+print "============"
+
+upright_constraints = moveit_msgs.msg.Constraints()
+upright_constraints.name = "upright"
+constraints = moveit_msgs.msg.OrientationConstraint()
+# constraints.header = "upright"
+constraints.link_name = group.get_end_effector_link()
+constraints.orientation = orientation
+constraints.absolute_x_axis_tolerance = 0.4
+constraints.absolute_y_axis_tolerance = 0.4
+constraints.absolute_z_axis_tolerance = 0.4
+constraints.weight = 1
+upright_constraints.orientation_constraints.append(constraints)
+
+def enable_upright_constraints():
+    group.set_path_constraints(upright_constraints)
+
+def move_to(x, y, z):
+    print "============ Generating plan 1"
+    pose_target = geometry_msgs.msg.Pose()
+    #pose_target.orientation.w = 1.0
+    #pose_target.position.x = 0.7
+    #pose_target.position.y = -0.05
+    #pose_target.position.z = 1.1
+    
+    pose_target.orientation = orientation
+    pose_target.position.x = x
+    pose_target.position.y = y
+    pose_target.position.z = z
+    
+    print pose_target
+    group.set_pose_target(pose_target)
+    plan1 = group.plan()
+    print "============ Waiting while RVIZ displays plan1..."
+    rospy.sleep(5)
+    print "============ Visualizing plan1"
+    display_trajectory = moveit_msgs.msg.DisplayTrajectory()
+    display_trajectory.trajectory_start = robot.get_current_state()
+    display_trajectory.trajectory.append(plan1)
+    display_trajectory_publisher.publish(display_trajectory)
+    print "============ Waiting while plan1 is visualized..."
+    # group.execute(plan1)
+    # gripper.open()
+    # rospy.sleep(1.0)
+    rospy.sleep(5)
+
+move_to(pick_pos.x, pick_pos.y, pick_pos.z)
 #pick_msg = Quaternion()
 #pick_msg.x = quat[0]
 #pick_msg.y = quat[1]
