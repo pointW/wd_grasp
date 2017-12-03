@@ -11,7 +11,11 @@
   
 3. Launch the grasp detection node.
 
-   ```roslaunch gpd baxter_15_channels.launch```
+   ```roslaunch wd_grasp baxter_15_channels.launch```
+   
+4. publish cluster and end position
+
+   ```rosrun wd_grasp wd_grasp_publisher```
 
 4. Request a point cloud:
 
@@ -21,6 +25,7 @@
    
    If GPD is running (Step 3), this will also produce a list of grasps on the topic: /detect_grasps/clustered_grasps
 
+5. python src/wd_grasp/scripts/pick_and_place.py joint_states:=/robot/joint_states
 
 ## Grasp Configuration
 

@@ -44,8 +44,10 @@ pub_place_mark = rospy.Publisher('place_mark', Marker, queue_size=1)
 
 grasp = grasps[0]
 for g in grasps:
-  if g.approach.x > 0.9 and g.approach.y > 0:
+  if g.approach.x > 0.85 and g.axis.z < -0.85 and g.binormal.y < -0.85 and g.bottom.z > -0.04 :
     grasp = g
+    break
+print grasp
 pick_rotation = numpy.array([[grasp.approach.x, grasp.binormal.x, grasp.axis.x, grasp.bottom.x],
                              [grasp.approach.y, grasp.binormal.y, grasp.axis.y, grasp.bottom.y],
                              [grasp.approach.z, grasp.binormal.z, grasp.axis.z, grasp.bottom.z],
@@ -70,8 +72,8 @@ pick_marker.scale.x = 0.1
 pick_marker.scale.y = 0.01
 pick_marker.scale.z = 0.01
 pick_marker.color.a = 1.0
-pick_marker.color.r = 0.0
-pick_marker.color.g = 1.0
+pick_marker.color.r = 1.0
+pick_marker.color.g = 0.0
 pick_marker.color.b = 0.0
 
 place_rotation = numpy.array([[grasp.approach.x, grasp.binormal.x, grasp.axis.x, goal_pos.x],
@@ -99,8 +101,8 @@ place_marker.scale.x = 0.1
 place_marker.scale.y = 0.01
 place_marker.scale.z = 0.01
 place_marker.color.a = 1.0
-place_marker.color.r = 0.0
-place_marker.color.g = 1.0
+place_marker.color.r = 1.0
+place_marker.color.g = 0.0
 place_marker.color.b = 0.0
 
 for i in range(1, 10):
@@ -120,9 +122,13 @@ import baxter_interface
 
 gripper = baxter_interface.Gripper('right')
 
-end_rotation = numpy.array([[grasp.axis.x, grasp.approach.x, grasp.binormal.x, grasp.bottom.x],
-                            [grasp.axis.y, grasp.approach.y, grasp.binormal.y, grasp.bottom.y],
-                            [grasp.axis.z, grasp.approach.z, grasp.binormal.z, grasp.bottom.z],
+#end_rotation = numpy.array([[grasp.axis.x, grasp.approach.x, grasp.binormal.x, grasp.bottom.x],
+                            #[grasp.axis.y, grasp.approach.y, grasp.binormal.y, grasp.bottom.y],
+                            #[grasp.axis.z, grasp.approach.z, grasp.binormal.z, grasp.bottom.z],
+                            #[0, 0, 0, 1]])
+end_rotation = numpy.array([[-grasp.axis.x, grasp.binormal.x, grasp.approach.x, grasp.bottom.x],
+                            [-grasp.axis.y, grasp.binormal.y, grasp.approach.y, grasp.bottom.y],
+                            [-grasp.axis.z, grasp.binormal.z, grasp.approach.z, grasp.bottom.z],
                             [0, 0, 0, 1]])
 end_quat = tf.transformations.quaternion_from_matrix(end_rotation)
 orientation = Quaternion(x = end_quat[0],
@@ -156,7 +162,7 @@ constraints.link_name = group.get_end_effector_link()
 constraints.orientation = orientation
 constraints.absolute_x_axis_tolerance = 0.4
 constraints.absolute_y_axis_tolerance = 0.4
-constraints.absolute_z_axis_tolerance = 0.4
+constraints.absolute_z_axis_tolerance = 0.1
 constraints.weight = 1
 upright_constraints.orientation_constraints.append(constraints)
 
@@ -187,23 +193,27 @@ def move_to(x, y, z):
     display_trajectory.trajectory.append(plan1)
     display_trajectory_publisher.publish(display_trajectory)
     print "============ Waiting while plan1 is visualized..."
-    # group.execute(plan1)
-    # gripper.open()
-    # rospy.sleep(1.0)
+    s = raw_input('Hit [ENTER] to continue')
+    
+    #group.execute(plan1)
+   
     rospy.sleep(5)
 
+# gripper.open()
+# rospy.sleep(1.0)
 move_to(pick_pos.x, pick_pos.y, pick_pos.z)
-#pick_msg = Quaternion()
-#pick_msg.x = quat[0]
-#pick_msg.y = quat[1]
-#pick_msg.z = quat[2]
-#pick_msg.w = quat[3]
+# gripper.close()
+# rospy.sleep(1.0)
+
+# move_to(pick_pos.x, pick_pos.y, pick_pos.z + 0.1)
+# move_to(place_pos.x, place_pos.y, place_pos.z)
+# gripper.open()
+# rospy.sleep(1.0)
 
 
 
 
 
-#msg = GoalConfig()
 #msg.bottom = goal_pos
 #msg.approach = grasp.approach
 #msg.binormal = grasp.binormal

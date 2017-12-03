@@ -25,7 +25,7 @@ int main(int argc, char** argv)
 {
   ros::init (argc, argv, "my_cloud_base");
   ros::NodeHandle nh;
-  ros::Rate loop_rate(10);
+  ros::Rate loop_rate(2);
     
     
   ros::Subscriber sub = nh.subscribe<pcl::PointCloud<pcl::PointXYZRGB> >("/cloud_base", 1, callback);
