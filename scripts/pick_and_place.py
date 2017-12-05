@@ -44,9 +44,12 @@ pub_place_mark = rospy.Publisher('place_mark', Marker, queue_size=1)
 
 grasp = grasps[0]
 for g in grasps:
-  if g.approach.x > 0.85 and g.axis.z < -0.85 and g.binormal.y < -0.85 and g.bottom.z > -0.04 :
+  if g.approach.x > 0.85 and g.axis.z < -0.85:
     grasp = g
     break
+if grasp.approach.x < 0.85:
+  print 'bad grasp'
+  exit
 print grasp
 pick_rotation = numpy.array([[grasp.approach.x, grasp.binormal.x, grasp.axis.x, grasp.bottom.x],
                              [grasp.approach.y, grasp.binormal.y, grasp.axis.y, grasp.bottom.y],
@@ -199,11 +202,19 @@ def move_to(x, y, z):
    
     rospy.sleep(5)
 
-# gripper.open()
-# rospy.sleep(1.0)
+#current_pos = group.get_current_pose().pose.position
+#move_to(current_pos.x, current_pos.y, current_pos.z + 0.1)
+#s = raw_input('Hit [ENTER] to continue')
+
+move_to(pick_pos.x - 0.1 * grasp.approach.x, 
+        pick_pos.y - 0.1 * grasp.approach.y, 
+        pick_pos.z - 0.1 * grasp.approach.z)
+
+#gripper.open()
+#rospy.sleep(1.0)
 move_to(pick_pos.x, pick_pos.y, pick_pos.z)
-# gripper.close()
-# rospy.sleep(1.0)
+#gripper.close()
+#rospy.sleep(1.0)
 
 # move_to(pick_pos.x, pick_pos.y, pick_pos.z + 0.1)
 # move_to(place_pos.x, place_pos.y, place_pos.z)
