@@ -1,7 +1,7 @@
 import rospy, numpy, tf
 from grasp_candidates_classifier.msg import GraspConfigList
 from wd_grasp.msg import GoalConfig
-from geometry_msgs.msg import Point, Quaternion
+from geometry_msgs.msg import Point, Quaternion, Pose
 from visualization_msgs.msg import Marker
 
 
@@ -206,13 +206,24 @@ def move_to(x, y, z):
 #move_to(current_pos.x, current_pos.y, current_pos.z + 0.1)
 #s = raw_input('Hit [ENTER] to continue')
 
+gripper.open()
+rospy.sleep(1.0)
+
 move_to(pick_pos.x - 0.1 * grasp.approach.x, 
         pick_pos.y - 0.1 * grasp.approach.y, 
         pick_pos.z - 0.1 * grasp.approach.z)
+waypoints = []
+waypoints.append(group.get_current_pose().pose)
+wpose = Pose()
+wpose.orientation = orientation
+wpose.position = pick_pos
+waypoints.append(copy.deepcopy(wpose))
 
-#gripper.open()
-#rospy.sleep(1.0)
-move_to(pick_pos.x, pick_pos.y, pick_pos.z)
+(plan, fraction) = group.compute_cartesian_path(
+							waypoints,
+							0.01,
+							0.0)
+
 #gripper.close()
 #rospy.sleep(1.0)
 
@@ -222,16 +233,4 @@ move_to(pick_pos.x, pick_pos.y, pick_pos.z)
 # rospy.sleep(1.0)
 
 
-
-
-
-#msg.bottom = goal_pos
-#msg.approach = grasp.approach
-#msg.binormal = grasp.binormal
-#msg.axis = grasp.axis
-#rospy.loginfo(msg)
-#s = raw_input('Hit [ENTER] to publish')
-#pub.publish(msg)
-#rospy.sleep(2)
-#print 'Published goal config'
 
