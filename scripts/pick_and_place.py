@@ -198,7 +198,7 @@ def move_to(x, y, z):
     print "============ Waiting while plan1 is visualized..."
     s = raw_input('Hit [ENTER] to continue')
     
-    #group.execute(plan1)
+    group.execute(plan1)
    
     rospy.sleep(5)
 
@@ -223,14 +223,25 @@ waypoints.append(copy.deepcopy(wpose))
 							waypoints,
 							0.01,
 							0.0)
+print "============ Waiting while RVIZ displays plan3..."
+rospy.sleep(5)
+print "============ Visualizing plan3"
+display_trajectory = moveit_msgs.msg.DisplayTrajectory()
+display_trajectory.trajectory_start = robot.get_current_state()
+display_trajectory.trajectory.append(plan)
+display_trajectory_publisher.publish(display_trajectory)
+print "============ Waiting while plan3 is visualized..."
+s = raw_input('Hit [ENTER] to continue')
+group.execute(plan)
+rospy.sleep(5)
 
-#gripper.close()
-#rospy.sleep(1.0)
+gripper.close()
+rospy.sleep(1.0)
 
-# move_to(pick_pos.x, pick_pos.y, pick_pos.z + 0.1)
-# move_to(place_pos.x, place_pos.y, place_pos.z)
-# gripper.open()
-# rospy.sleep(1.0)
+move_to(pick_pos.x, pick_pos.y, pick_pos.z + 0.1)
+move_to(place_pos.x, place_pos.y, place_pos.z)
+gripper.open()
+rospy.sleep(1.0)
 
 
 
